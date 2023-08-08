@@ -1,5 +1,5 @@
 # set the directory
-setwd("C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation")
+setwd("C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation\\Data Section")
 
 #load libraries
 library(ggplot2)
@@ -14,7 +14,7 @@ library(scales)
 library(ggtext)
 
 #load the data
-data <- read_csv('Data Section/Dataset.csv')
+data <- read_csv('Data Files for Git/Dataset.csv')
 
 # Make age categories in the proper order
 age_category_order <- c('0-5', '6-11', '12-23', '24-35', '36-47', '48-60')

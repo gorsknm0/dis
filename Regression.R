@@ -7,7 +7,7 @@ library(ggplot2)
 library(dplyr)
 
 # load data
-data <- read.csv("Dataset.csv")
+data <- read.csv("Data Files for Git/Dataset.csv")
 
 #two-way contingency table of categorical outcome and predictors we want to make sure there are not 0 cells
 xtabs(~stunted_numeric + wealth_index_rank, data = data)

@@ -23,7 +23,7 @@ library(rgeos)
 library(ggrepel)
 
 # load data
-data <- read.csv("Dataset.csv")
+data <- read.csv("Data Files for Git/Dataset.csv")
 
 # create a table for ward name with count and frequency while making a new column of its type
 ward_table <- data %>%
@@ -44,7 +44,7 @@ village_table <- data %>%
   summarize(n = n(), frequency = n() / nrow(data))
 
 # outline of Mopeia
-load('mop.RData')
+load('dis/mop.RData')
 plot(mop)
 
 #fortify the shape file so that it is ggplot compatible

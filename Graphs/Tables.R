@@ -9,7 +9,7 @@ library(knitr)
 library(fastmap)
 
 # load data
-data <- read.csv("Dataset.csv")
+data <- read.csv("Data Files for Git/Dataset.csv")
 
 # make a table of characteristics of toddlers
 options(knitr.table.format = "html") # to allow for a slightly complex table that RMarkdown doesn't support
