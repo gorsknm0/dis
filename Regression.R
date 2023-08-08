@@ -40,6 +40,22 @@ ors$lwr <- cis[,1]
 ors$upr <- cis[,2]
 
 
+############testing to make a table
+# load package
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+
+tab_model(mylogit,
+          pred.labels = c("Intercept", "Poor Individuals", "Distance from Administrative Posts", "Household Roster Size", "Distance from Nearest Health Facility"),
+          dv.labels = "Model of Stunting",
+          string.ci = "Conf. Int (95%)",
+          string.p = "P-Value"
+          #p.style = "stars"
+          )
+
+# https://cran.r-project.org/web/packages/sjPlot/vignettes/tab_model_estimates.html
+
 ##################### NOT SURE THIS IS NEEDED ##############################
 
 # obtain confidence intervals for the coefficient estimate
