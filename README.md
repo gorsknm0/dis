@@ -8,5 +8,5 @@ Research Objectives:
 3.	Investigate how socioeconomic and geospatial factors influence stunting rates of children in Mopeia, Mozambique.
 
 ## Table of Contents
-
+*Graphs:* RScripts that create the graphs, maps, and tables for the dissertation
 ## How to Install and Run the Project
