@@ -10,3 +10,6 @@ Research Objectives:
 ## Table of Contents
 *Graphs:* RScripts that create the graphs, maps, and tables for the dissertation
 ## How to Install and Run the Project
+1. Obtain the data from Nika.
+2. Run the Dataset Creation RScript.
+3. Proceed to run any RScript that you would like to to make the associated map, graph, or table.
