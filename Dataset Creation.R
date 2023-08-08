@@ -1,5 +1,5 @@
 # set the directory
-setwd("C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation")
+setwd("C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation\\Data Section")
 
 #load libraries
 library(dplyr)
@@ -11,18 +11,20 @@ library(aod)
 library(rgdal)
 library(ggthemes)
 library(sp)
+library(tidyr)
+library(readr)
 
 # unit of observation in individuals is an individual visit (meaning for one person there are multiple observations)
-individuals <- read_csv('Data Section/tmp/crf/repeat_individual_questionnaire.csv')
+individuals <- read_csv('Data Files for Git/repeat_individual_questionnaire.csv')
 
 # more than one observation per household
-households <- read_csv('Data Section/tmp/crf/Submissions.csv')
+households <- read_csv('Data Files for Git/Submissions.csv')
 
 # get visit date and number from households into individuals
 data <- left_join(individuals,households,by=c('parent_key'='key'))
 
 # wealth index dataset
-wealth <- read_csv('Data Section/tmp/crf/wealth_index.csv')
+wealth <- read_csv('Data Files for Git/wealth_index.csv')
 
 # Join the above dataset with the wealth_index.csv dataset
 data <- left_join(data,wealth,by=c('household_id'))
@@ -98,7 +100,7 @@ data <- data %>%
   mutate(stunted = zlen <= 0)
 
 #making the cleaned dataset with only necessary variables
-clean <- select(data, c(person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, wealth_index_score, wealth_index_std_score, wealth_index_rank))
+clean <- select(data, person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, wealth_index_score, wealth_index_std_score, wealth_index_rank)
 
 #rename merged_weight and merged_height to weight and height
 names(clean)[names(clean) == "merged_height"] <- "height"
@@ -118,10 +120,10 @@ clean <- clean %>%
 #                                                                   lng, lat)
 #   write_csv(household_locations, 'Data Section/tmp/crf/household_locations.csv')
 # }
-locations <- read_csv('Data Section/tmp/crf/household_locations.csv')
+locations <- read_csv('Data Files for Git/household_locations.csv')
 
 # Read in household ID encryptions
-encryptions <- read_csv('Data Section/tmp/crf/household_id_encryptions.csv')
+encryptions <- read_csv('Data Files for Git/household_id_encryptions.csv')
 
 # Decrypt the household IDs
 locations <- locations %>%
@@ -138,7 +140,7 @@ clean <- left_join(clean, locations)
 # hf <- rgdal::readOGR('Data Section/tmp/crf/health_facilities/', 'health_facilities')
 # save(hf, file = 'Data Section/tmp/crf/hf.RData')
 library(sp)
-load('Data Section/tmp/crf/hf.RData')
+load('Data Files for Git/hf.RData')
 # Sanity plot
 plot(hf)
 
@@ -176,7 +178,7 @@ ggplot(data = clean,
 # road_dist: distance from the household to the road
 # roads <- rgdal::readOGR('Data Section/tmp/crf/mopeia_roads/', 'mopeia_roads')
 # save(roads, file = 'Data Section/tmp/crf/roads.RData')
-load('Data Section/tmp/crf/roads.RData')
+load('Data Files for Git/roads.RData')
 roads_projected <- spTransform(roads, proj_crs)
 
 # sanity plot
@@ -231,4 +233,4 @@ clean <- clean %>%
 clean$stunted_numeric <- as.numeric(clean$stunted)
 
 # make this into a csv file and save to computer 
-write.csv(clean, "C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation\\Data Section\\Dataset.csv", row.names=FALSE)
+write.csv(clean, "C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation\\Data Section\\Data Files for Git\\Dataset.csv", row.names=FALSE)
