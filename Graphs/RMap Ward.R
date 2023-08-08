@@ -171,6 +171,11 @@ data %>%
   summarize(stunted_count = sum(stunted),
             not_stunted = sum(!stunted))
 
+data %>%
+  group_by(cluster) %>%
+  summarize(stunted_count = sum(stunted),
+            not_stunted = sum(!stunted))
+
 data %>% 
   summarize(stunted_count = sum(stunted),
             not_stunted = sum(!stunted))

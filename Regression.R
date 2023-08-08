@@ -25,7 +25,7 @@ data$rich_or_poor <- ifelse(data$wealth_index_rank == 'Rank 1 (richest)',
 
 data$rich_or_poor <- factor(data$rich_or_poor, levels = c('rich', 'poor'))
 
-mylogit <- glm(stunted_numeric ~ rich_or_poor + admin_dist + roster_size + health_km, 
+mylogit <- glm(stunted_numeric ~ rich_or_poor + roster_size + health_km, 
                data = data, 
                family = 'binomial')
 
@@ -53,6 +53,33 @@ tab_model(mylogit,
           string.p = "P-Value"
           #p.style = "stars"
           )
+
+# clusters near or far health center how does it impact stunting?
+#create dataset where see statistic of stunting in cluster, calculate centroid of cluster to health facility. cluster, percentage of stunting, average distance to health facility, fit a logit model to that. 
+
+test <- data %>%
+  group_by(cluster) %>%
+  summarise(stunted_count = sum(stunted),
+            not_stunted = sum(!stunted),
+            average_dist = median(health_km)) %>%
+  mutate(percent_stunted = stunted_count / (not_stunted + stunted_count))
+
+summary(glm(percent_stunted~average_dist, family = binomial, data = test))
+
+#fit multilevel model with a random effect for the individuals
+#package lme4 with cluster as the fixed effect
+#clustered logistic regression
+
+library(lme4)
+model <- lmer(stunted ~ health_km + roster_size + rich_or_poor + (1 | cluster), data = data)
+
+summary(model)
+
+tab_model(model,
+          pred.labels = c("Intercept", "Distance from Nearest Health Facility", "No. of People in Household", "Poor Category"),
+          dv.labels = "Model of Stunting",
+          string.ci = "Conf. Int (95%)",
+          string.p = "P-Value")
 
 # https://cran.r-project.org/web/packages/sjPlot/vignettes/tab_model_estimates.html
 
