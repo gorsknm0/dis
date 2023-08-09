@@ -20,6 +20,48 @@ individuals <- read_csv('Data Files for Git/repeat_individual_questionnaire.csv'
 # more than one observation per household
 households <- read_csv('Data Files for Git/Submissions.csv')
 
+#make the numeric boolean
+households <- households %>%
+  mutate(sec2_q1_3a = sec2_q1_3a >= 1,
+         sec2_q1_7a = sec2_q1_7a >= 1,
+         sec2_q1_8a = sec2_q1_8a >= 1,
+         sec2_q1_9a = sec2_q1_9a >= 1)
+
+#add false answers
+households <- households %>%
+  mutate(sec2_q1_1a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_1a), 
+         sec2_q1_2a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_2a), 
+         sec2_q1_3a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_3a), 
+         sec2_q1_4a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_4a), 
+         sec2_q1_5a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_5a), 
+         sec2_q1_6a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_6a), 
+         sec2_q1_7a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_7a), 
+         sec2_q1_8a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_8a), 
+         sec2_q1_9a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_9a), 
+         sec2_q1_10a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_10a), 
+         sec2_q1_11a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_11a), 
+         sec2_q1_12a = ifelse(sec2_q1 == 0, FALSE, sec2_q1_12a))
+
+# create a total_assets column
+households <- households %>%
+  mutate(total_assets = ifelse(!is.na(sec2_q1),
+                               rowSums(select(., sec2_q1_1a:sec2_q1_12a) == TRUE, na.rm = TRUE), NA))
+
+
+# assign the number of total_assets to all of those in the household
+households <- households  %>%
+  group_by(household_id) %>%
+  mutate(
+    has_non_na_value = any(!is.na(total_assets)),
+    representative_total_assets = ifelse(has_non_na_value, max(total_assets, na.rm = TRUE), NA)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    total_assets = ifelse(!is.na(representative_total_assets), representative_total_assets, total_assets),
+    total_assets = ifelse(has_non_na_value & is.na(total_assets), representative_total_assets, total_assets)
+  ) %>%
+  select(-has_non_na_value, -representative_total_assets)
+
 # get visit date and number from households into individuals
 data <- left_join(individuals,households,by=c('parent_key'='key'))
 
@@ -28,6 +70,20 @@ wealth <- read_csv('Data Files for Git/wealth_index.csv')
 
 # Join the above dataset with the wealth_index.csv dataset
 data <- left_join(data,wealth,by=c('household_id'))
+
+# Group the data by household and check if any individual in the household has "Yes" for breastfeeding
+#data <- data %>%
+  #group_by(household_id) %>%
+  #mutate(breastfeeding_status = ifelse(any(breastfeeding == "Yes", na.rm = TRUE), "Yes", ifelse(all(is.na#(breastfeeding)), NA, "No"))) %>% ungroup()
+
+# Replace NAs in the new column with "No"
+#my_data$Breastfeeding_Status[is.na(my_data$Breastfeeding_Status)] <- "No"
+
+# make the assets all numeric
+# side note: sec2_q1_10a, sec2_q1_11a, sec2_q1_12a are all NA
+
+
+
 
 #merge weight and child_weight and height and child_height
 data$merged_weight <- ifelse(!is.na(data$weight), data$weight, data$child_weight)
@@ -99,16 +155,20 @@ data <- data %>%
 data <- data %>%
   mutate(stunted = zlen <= 0)
 
+# remove NAs from wealth columns
+data <- data %>% 
+  drop_na(wealth_index_rank)
+
+
 #making the cleaned dataset with only necessary variables
-clean <- select(data, person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, wealth_index_score, wealth_index_std_score, wealth_index_rank)
+clean <- select(data, person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, n_nets, total_assets, vax_card, wealth_index_score, wealth_index_std_score, wealth_index_rank)
+
+# remove NAs from wealth columns
+#clean <- clean %>% drop_na(breastfeeding_status)
 
 #rename merged_weight and merged_height to weight and height
 names(clean)[names(clean) == "merged_height"] <- "height"
 names(clean)[names(clean) == "merged_weight"] <- "weight"
-
-# remove NAs from wealth columns
-clean <- clean %>% 
-  drop_na(wealth_index_rank)
 
 # Now we will add the distance variables
 
@@ -142,7 +202,7 @@ clean <- left_join(clean, locations)
 library(sp)
 load('Data Files for Git/hf.RData')
 # Sanity plot
-plot(hf)
+#plot(hf)
 
 # health_dist: distance from the household to the health facility (Centro de Saúde de Mopeia Sede) [-17.979471355490286, 35.712640789708786]
 # Create an object just for mopeia sede health facility
@@ -182,7 +242,7 @@ load('Data Files for Git/roads.RData')
 roads_projected <- spTransform(roads, proj_crs)
 
 # sanity plot
-plot(roads_projected)
+#plot(roads_projected)
 
 # Not sure which is "main" road so just calculating distance to all roads
 # Calculate distance in meters
@@ -234,3 +294,4 @@ clean$stunted_numeric <- as.numeric(clean$stunted)
 
 # make this into a csv file and save to computer 
 write.csv(clean, "C:\\Users\\Nika\\OneDrive\\Documents\\Master's\\Dissertation\\Data Section\\Data Files for Git\\Dataset.csv", row.names=FALSE)
+

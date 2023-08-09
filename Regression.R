@@ -25,7 +25,7 @@ data$rich_or_poor <- ifelse(data$wealth_index_rank == 'Rank 1 (richest)',
 
 data$rich_or_poor <- factor(data$rich_or_poor, levels = c('rich', 'poor'))
 
-mylogit <- glm(stunted_numeric ~ rich_or_poor + roster_size + health_km, 
+mylogit <- glm(stunted_numeric ~ rich_or_poor + roster_size + age_in_months + cluster + total_assets, 
                data = data, 
                family = 'binomial')
 
@@ -40,6 +40,8 @@ ors$lwr <- cis[,1]
 ors$upr <- cis[,2]
 
 
+
+
 ############testing to make a table
 # load package
 library(sjPlot)
@@ -47,7 +49,7 @@ library(sjmisc)
 library(sjlabelled)
 
 tab_model(mylogit,
-          pred.labels = c("Intercept", "Poor Individuals", "Distance from Administrative Posts", "Household Roster Size", "Distance from Nearest Health Facility"),
+          #pred.labels = c("Intercept", "Poor Individuals", "Distance from Administrative Posts", "Household Roster Size", "Distance from Nearest Health Facility"),
           dv.labels = "Model of Stunting",
           string.ci = "Conf. Int (95%)",
           string.p = "P-Value"
@@ -70,16 +72,28 @@ summary(glm(percent_stunted~average_dist, family = binomial, data = test))
 #package lme4 with cluster as the fixed effect
 #clustered logistic regression
 
+new <- data %>% 
+  drop_na(n_nets)
+
 library(lme4)
-model <- lmer(stunted ~ health_km + roster_size + rich_or_poor + (1 | cluster), data = data)
+model <- lmer(zlen ~ roster_size + rich_or_poor + age_in_months + total_assets + (1 | cluster), data = data)
 
 summary(model)
 
 tab_model(model,
-          pred.labels = c("Intercept", "Distance from Nearest Health Facility", "No. of People in Household", "Poor Category"),
+         # pred.labels = c("Intercept", "Distance from Nearest Health Facility", "No. of People in Household", "Poor Category"),
           dv.labels = "Model of Stunting",
           string.ci = "Conf. Int (95%)",
           string.p = "P-Value")
+
+#using zlen for a model
+library(tidyverse)
+
+# Perform linear regression
+model1 <- lm(zlen ~ rich_or_poor + roster_size + age_in_months + cluster + total_assets, 
+            data = data)
+
+tab_model(model1)
 
 # https://cran.r-project.org/web/packages/sjPlot/vignettes/tab_model_estimates.html
 
@@ -149,6 +163,7 @@ ggplot(newdata3,
               alpha = 0.2) + 
   geom_line(aes(colour = wealth_index_rank),
             size = 1)
+
 ##########################new##########
 
 #create a histogram for admin_dist
