@@ -17,10 +17,66 @@ library(readr)
 # unit of observation in individuals is an individual visit (meaning for one person there are multiple observations)
 individuals <- read_csv('Data Files for Git/repeat_individual_questionnaire.csv')
 
+#focusing on vaccines
+# Calculate the total vaccinations for each row (ignoring NA values)
+total_vax <- rowSums(select(individuals, starts_with('vax_card_')) == 'Yes', na.rm = TRUE)
+
+# Create a logical vector indicating rows where all vaccine columns are NA
+all_na_rows <- rowSums(is.na(select(individuals, starts_with('vax_card_')))) == ncol(individuals)
+
+# Assign NA to total_vax for rows with all NA vaccine columns
+total_vax[all_na_rows] <- NA
+
+# Replace 0 values with NA if total_vax is 0 and there are no NA columns
+total_vax[total_vax == 0 & !all_na_rows] <- NA
+
+# Add the total_vax column to the data frame
+individuals$total_vax <- total_vax
+
 # more than one observation per household
 households <- read_csv('Data Files for Git/Submissions.csv')
 
-#make the numeric boolean
+# focusing on how much people spent on water, milk, vegetables, meat, beans, rice, cooking oil
+# make the variables boolean
+households <- households %>%
+  mutate(sec3_3_a = sec3_3_a >= 1,
+         sec3_3_b = sec3_3_b >= 1,
+         sec3_3_c = sec3_3_c >= 1,
+         sec3_3_d = sec3_3_d >= 1,
+         sec3_3_e = sec3_3_e >= 1,
+         sec3_3_f = sec3_3_f >= 1,
+         sec3_3_g = sec3_3_g >= 1)
+
+#add false answers
+households <- households %>%
+  mutate(sec3_3_a = ifelse(sec3_3_a == 0, FALSE, sec3_3_a), 
+         sec3_3_b = ifelse(sec3_3_b == 0, FALSE, sec3_3_b), 
+         sec3_3_c = ifelse(sec3_3_c == 0, FALSE, sec3_3_c), 
+         sec3_3_d = ifelse(sec3_3_d == 0, FALSE, sec3_3_d), 
+         sec3_3_e = ifelse(sec3_3_e == 0, FALSE, sec3_3_e), 
+         sec3_3_f = ifelse(sec3_3_f == 0, FALSE, sec3_3_f), 
+         sec3_3_g = ifelse(sec3_3_g == 0, FALSE, sec3_3_g))
+
+# create a total_bought column
+households <- households %>%
+  mutate(total_bought = ifelse(!is.na(sec3_3_a),
+                               rowSums(select(., sec3_3_a:sec3_3_g) == TRUE, na.rm = TRUE), NA))
+
+# assign the number of total_bought to all of those in the household
+households <- households  %>%
+  group_by(household_id) %>%
+  mutate(
+    has_non_na_value = any(!is.na(total_bought)),
+    representative_total_bought = ifelse(has_non_na_value, max(total_bought, na.rm = TRUE), NA)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    total_bought = ifelse(!is.na(representative_total_bought), representative_total_bought, total_bought),
+    total_bought = ifelse(has_non_na_value & is.na(total_bought), representative_total_bought, total_bought)
+  ) %>%
+  select(-has_non_na_value, -representative_total_bought)
+
+#make the numeric boolean for the assets section
 households <- households %>%
   mutate(sec2_q1_3a = sec2_q1_3a >= 1,
          sec2_q1_7a = sec2_q1_7a >= 1,
@@ -161,7 +217,7 @@ data <- data %>%
 
 
 #making the cleaned dataset with only necessary variables
-clean <- select(data, person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, n_nets, total_assets, vax_card, wealth_index_score, wealth_index_std_score, wealth_index_rank)
+clean <- select(data, person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, n_nets, total_assets, total_bought, total_vax, wealth_index_score, wealth_index_std_score, wealth_index_rank)
 
 # remove NAs from wealth columns
 #clean <- clean %>% drop_na(breastfeeding_status)

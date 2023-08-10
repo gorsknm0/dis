@@ -25,8 +25,8 @@ data$rich_or_poor <- ifelse(data$wealth_index_rank == 'Rank 1 (richest)',
 
 data$rich_or_poor <- factor(data$rich_or_poor, levels = c('rich', 'poor'))
 
-mylogit <- glm(stunted_numeric ~ rich_or_poor + roster_size + age_in_months + cluster + total_assets, 
-               data = data, 
+mylogit <- glm(stunted_numeric ~ rich_or_poor + roster_size + age_in_months + cluster + road_dist + total_vax, 
+               data = new, 
                family = 'binomial')
 
 # rich_or_poor + admin_dist + roster_size + health_km ( insert for mylogit )
@@ -73,10 +73,10 @@ summary(glm(percent_stunted~average_dist, family = binomial, data = test))
 #clustered logistic regression
 
 new <- data %>% 
-  drop_na(n_nets)
+  drop_na(total_vax)
 
 library(lme4)
-model <- lmer(zlen ~ roster_size + rich_or_poor + age_in_months + total_assets + (1 | cluster), data = data)
+model <- lmer(zlen ~ roster_size + rich_or_poor + road_dist + (1 | cluster), data = data)
 
 summary(model)
 
@@ -90,7 +90,7 @@ tab_model(model,
 library(tidyverse)
 
 # Perform linear regression
-model1 <- lm(zlen ~ rich_or_poor + roster_size + age_in_months + cluster + total_assets, 
+model1 <- lm(zlen ~ rich_or_poor + roster_size + cluster + road_dist, 
             data = data)
 
 tab_model(model1)
