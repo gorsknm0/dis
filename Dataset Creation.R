@@ -36,6 +36,12 @@ wealth <- read_csv('Data Files for Git/wealth_index.csv')
 # Join the above dataset with the wealth_index.csv dataset
 data <- left_join(data,wealth,by=c('household_id'))
 
+# get the specific variables used for the wealth index
+wealth_var <- read_csv('Data Files for Git/minicensus_household_final.csv')
+
+#join the above dataset with data
+data <- left_join(data,wealth_var, by=c('household_id'))
+
 ## insert breastfeeding from 'Extra'##
 
 # make age_in_days variable (this accounts for leap years) - 
@@ -131,7 +137,7 @@ data <- data %>%
 #data <- data[!outliers_mod_haz_iqr, ]
 
 # make a new variable called strange showing all of the strange variables
-data <- data %>% mutate(strange=zlen<=-4|zlen>=4)
+data <- data %>% mutate(strange=zlen<=-6|zlen>=6)
 
 # making data the dataframe without the strange in zlen
 data <- data %>%
@@ -139,7 +145,7 @@ data <- data %>%
 
 # making the data frame and creating a column that tells us if a child is stunted or not
 data <- data %>%
-  mutate(stunted = zlen <= 0)
+  mutate(stunted = zlen <= -2)
 
 # remove NAs from wealth columns
 data <- data %>% 
@@ -147,7 +153,7 @@ data <- data %>%
 
 
 #making the cleaned dataset with only necessary variables
-clean <- select(data, person_string, extid, household_id, hamlet_code_from_hhid, hamlet_name, village_name, ward_name, district_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_days, dob, sex, roster_size, wealth_index_score, wealth_index_std_score, wealth_index_rank)
+clean <- select(data, household_id, ward_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_months, age_in_days, dob, sex, hh_size, hh_sub_size, hh_head_age, hh_head_gender, hh_member_num_residents, lone_resident_households, hh_n_constructions, hh_n_constructions_sleep, hh_type, cook_water_source, time_to_cook_water, main_source_energy_for_lighting, hh_n_cows, hh_n_pigs, animals,  hh_wall_adobe_block, hh_wall_bamboo, hh_wall_brick_block, hh_wall_wood, hh_wall_palm_tree, hh_wall_tin, hh_wall_tinned_wood, hh_wall_bark, hh_wall_Other, hh_possession_Radio, hh_possession_TV, hh_possession_Cell_phone, irs_past_12_months, n_nets_in_hh, any_deaths_past_year, how_many_deaths, wealth_index_score, wealth_index_std_score, wealth_index_rank)
 
 #rename merged_weight and merged_height to weight and height
 names(clean)[names(clean) == "merged_height"] <- "height"

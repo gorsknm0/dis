@@ -75,7 +75,7 @@ summary(glm(percent_stunted~average_dist, family = binomial, data = test))
 #clustered logistic regression
 
 library(lme4)
-model <- lmer(stunted_numeric ~ rich_or_poor + road_km + (1 | cluster), data = data)
+model <- lmer(stunted_numeric ~ rich_or_poor + admin_km + (1 | cluster), data = data)
 
 summary(model)
 
@@ -95,3 +95,12 @@ model1 <- lm(zlen ~ rich_or_poor + roster_size + cluster + road_dist,
 tab_model(model1)
 
 # https://cran.r-project.org/web/packages/sjPlot/vignettes/tab_model_estimates.html
+
+#testing with new variables
+#sex, hh_size, hh_sub_size, hh_head_age, hh_head_gender, hh_member_num_residents, lone_resident_households, hh_n_constructions, hh_n_constructions_sleep, hh_type, cook_water_source, time_to_cook_water, main_source_energy_for_lighting, hh_n_cows, hh_n_pigs, animals,  hh_wall_adobe_block, hh_wall_bamboo, hh_wall_brick_block, hh_wall_wood, hh_wall_palm_tree, hh_wall_tin, hh_wall_tinned_wood, hh_wall_bark, hh_wall_Other, hh_possession_Radio, hh_possession_TV, hh_possession_Cell_phone, irs_past_12_months, n_nets_in_hh, any_deaths_past_year
+
+
+  # Drop rows containing NAs from specified columns
+  testing_data <- data %>% data[complete.cases(data$hh_size, data$hh_sub_size, data$hh_head_age, data$hh_head_gender, data$hh_member_num_residents, data$lone_resident_households, data$hh_n_constructions, data$hh_n_constructions_sleep, data$hh_type, data$cook_water_source, data$time_to_cook_water, data$main_source_energy_for_lighting, data$hh_n_cows, data$hh_n_pigs, data$animals,  data$hh_wall_adobe_block, data$hh_wall_bamboo, data$hh_wall_brick_block, data$hh_wall_wood, data$hh_wall_palm_tree, data$hh_wall_tin, data$hh_wall_tinned_wood, data$hh_wall_bark, data$hh_wall_Other, data$hh_possession_Radio, data$hh_possession_TV, data$hh_possession_Cell_phone, data$irs_past_12_months, data$n_nets_in_hh, data$any_deaths_past_year), ]
+
+model <- lmer(stunted_numeric ~ sex + hh_size + hh_sub_size + hh_head_age + hh_head_gender + hh_member_num_residents + lone_resident_households + hh_n_constructions + hh_n_constructions_sleep + hh_type + cook_water_source + time_to_cook_water + main_source_energy_for_lighting + hh_n_cows + hh_n_pigs + animals +  hh_wall_adobe_block + hh_wall_bamboo + hh_wall_brick_block + hh_wall_wood + hh_wall_palm_tree + hh_wall_tin + hh_wall_tinned_wood + hh_wall_bark + hh_wall_Other + hh_possession_Radio + hh_possession_TV + hh_possession_Cell_phone + irs_past_12_months + n_nets_in_hh + any_deaths_past_year + admin_km + (1 | cluster), data = testing_data)

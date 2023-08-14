@@ -43,17 +43,17 @@ data %>%
   # add mopeia average line
   geom_hline(yintercept = mopeia_average, linetype = "dashed", color = "darkred") + 
   # add horizontal line
-  geom_text(aes(x = 3.15, y = national_average + 0.02,
+  geom_text(aes(x = 1.5, y = national_average + 0.01,
                 label = "National Stunting Average of 43% (Source: USAID)"),
             # make words bold fontface = 'bold',
             vjust = 0, hjust = 0, color = "darkblue", angle = 0, size = 3) + 
   #label the mopeia line
-  geom_text(aes(x = 4.8, y = mopeia_average - 0.05,
-               label = "Mopeia Average of 81%"),
+  geom_text(aes(x = 4, y = mopeia_average + 0.005,
+               label = "Mopeia Average of 40%"),
            vjust = 0, hjust = 0, color = "darkred", angle = 0, size = 3) +
   # add text annotation
   labs(title = 'Proportion of Children Stunted by Age Group',
        x = 'Age in Months',
        y = 'Proportion of Stunted Children') +
-  scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 1)) +
+  scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
   theme_minimal()
