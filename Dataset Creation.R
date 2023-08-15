@@ -36,11 +36,34 @@ wealth <- read_csv('Data Files for Git/wealth_index.csv')
 # Join the above dataset with the wealth_index.csv dataset
 data <- left_join(data,wealth,by=c('household_id'))
 
-# get the specific variables used for the wealth index
-wealth_var <- read_csv('Data Files for Git/minicensus_household_final.csv')
+# read in and join all of the minicensus data
+#
+minicensus_data <- read_csv('Data Files for Git/minicensus_data.csv')
+  
+# 
+minicensus_household_final <- read_csv('Data Files for Git/minicensus_household_final.csv')
 
-#join the above dataset with data
-data <- left_join(data,wealth_var, by=c('household_id'))
+#
+minicensus_wealth_index <- read_csv('Data Files for Git/minicensus_wealth_index.csv')
+
+#merge the minicensus files by hh_id
+minicensus <- left_join(minicensus_data,minicensus_household_final, by=c('hh_id'))
+
+#merge the last minicensus file by hh_id
+minicensus <- left_join(minicensus, minicensus_wealth_index, by=c('hh_id'))
+
+# read in the csv that matches household_id to hh_id
+encryption <- read_csv('Data Files for Git/household_id_encryptions.csv')
+
+# change the column name of anonymized_household_id to hh_id
+encryption$hh_id <- encryption$anonymized_household_id
+
+# merge encryption with minicensus
+minicensus <- left_join(minicensus, encryption, by=c('hh_id'))
+
+# merge minicensus and data
+data <- left_join(minicensus, data, by=c('household_id'))
+
 
 ## insert breastfeeding from 'Extra'##
 
@@ -153,7 +176,7 @@ data <- data %>%
 
 
 #making the cleaned dataset with only necessary variables
-clean <- select(data, household_id, ward_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_months, age_in_days, dob, sex, hh_size, hh_sub_size, hh_head_age, hh_head_gender, hh_member_num_residents, lone_resident_households, hh_n_constructions, hh_n_constructions_sleep, hh_type, cook_water_source, time_to_cook_water, main_source_energy_for_lighting, hh_n_cows, hh_n_pigs, animals,  hh_wall_adobe_block, hh_wall_bamboo, hh_wall_brick_block, hh_wall_wood, hh_wall_palm_tree, hh_wall_tin, hh_wall_tinned_wood, hh_wall_bark, hh_wall_Other, hh_possession_Radio, hh_possession_TV, hh_possession_Cell_phone, irs_past_12_months, n_nets_in_hh, any_deaths_past_year, how_many_deaths, wealth_index_score, wealth_index_std_score, wealth_index_rank)
+clean <- select(data, household_id, ward_name, cluster, stunted, zlen, merged_weight, merged_height, age, age_in_months, age_in_days, dob, sex, hh_member_num, hh_n_constructions, n_nets_in_hh, member_per_sleep, hh_n_cows, hh_n_pigs, animals, hh_main_building_type, building_type_apartment, building_type_conventional_house, building_type_flat, building_type_hut, building_type_precarious, building_type_traditional_mud_house, building_type_other, hh_main_wall_material, hh_wall_adobe_block, hh_wall_bamboo, hh_wall_tin, hh_wall_bark, hh_wall_tinned_wood, hh_wall_palm_tree, hh_wall_brick_block, hh_wall_Other, cook_main_water_source, water_source_piped_water_house, water_source_piped_water_compound, water_source_piped_water_neighbor, water_source_fountain, water_source_protected_well_in_backyard, water_source_protected_well_out_backyard, water_sourcel_unprotected_well_in_household, water_source_unprotected_well_out_household, water_source_hole_man_pump_inside_household, water_source_hole_protected_hand_pump_yard, water_source_surface, water_source_rainwater, water_source_mineral_bottled_water, water_source_water_tank_truck, water_source_other, water_time_under_10_min, water_time_between_10_30_min, water_time_between_30_60_min, water_time_more_than_hour, lighting_energy_electricity, lighting_energy_generator, lighting_energy_solar_panel, lighting_energy_gas, lighting_energy_oil, lighting_energy_candles, lighting_energy_batteries, lighting_energy_firewood, lighting_energy_other, cook_time_to_water, hh_main_energy_source_for_lighting, hh_possession_Radio, hh_possession_TV, hh_possession_Cell_phone, any_deaths_past_year, hh_head_age, hh_head_gender, wealth_index_score, wealth_index_std_score, wealth_index_rank)
 
 #rename merged_weight and merged_height to weight and height
 names(clean)[names(clean) == "merged_height"] <- "height"
