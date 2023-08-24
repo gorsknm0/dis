@@ -39,11 +39,6 @@ ward_table <- data %>%
     frequency = mean(stunted_numeric)
   )
 
-# create a table for village name with count and frequency while making a new column of its type
-village_table <- data %>%
-  group_by(village_name) %>%
-  summarize(n = n(), frequency = n() / nrow(data))
-
 # outline of Mopeia
 load('dis/mop.RData')
 plot(mop)
@@ -182,3 +177,48 @@ ggplot() +
   coord_fixed() +
   # Add a title to the plot
   labs(title = "Prevalence of Stunting in Children Under 5 in Relation\nto Health Facilities and the Village Center")
+
+load('Data Files for Git/roads.RData')
+roads_projected <- spTransform(roads, proj_crs)
+roads_gg <- fortify(roads, id = 'osm_id')
+
+#######################
+# create a plot of sunting with the health facility and village center points added
+ggplot() +
+  # add polygon layers from 'rf' dataset
+  geom_polygon(data = rf,
+               aes(x = long,
+                   y = lat,
+                   group = group,
+                   fill = frequency),
+               color = 'white') + 
+  # define the fill color gradient and customize the legend
+  scale_fill_gradient2_tableau(name = 'Prevalence of\nstunting',
+                               palette = 'Green-Blue Diverging',
+                               labels = label_percent(scale = 100)) +
+  geom_path(data = roads_projected,
+            aes(x = long, 
+                y = lat),
+            color = 'black') +
+  # Apply a theme for the map
+  theme_map() +
+  # Adjust the position of the legend
+  theme(legend.position = c(1,-0.1)) +
+  # Increase the plot margins to create more space for ward name labels
+  theme(plot.margin = margin(0, 3, 0, 0, "cm")) +
+  # Increase the spacing between the legend and the plot
+  theme(legend.spacing = unit(0, "lines")) +
+  # Customize the appearance of the title
+  theme(plot.title = element_text(size = 14, 
+                                  face = "bold", 
+                                  family = "Arial", 
+                                  color = "darkblue",
+                                  hjust = 0,
+                                  vjust = 0,
+                                  margin = margin(b = 20))) + 
+  # Set the aspect ratio to control squishing
+  coord_fixed() +
+  # Add a title to the plot
+  labs(title = "Prevalence of Stunting in Children Under 5 in Relation\nto Health Facilities and the Village Center")
+
+plot(roads_projected)

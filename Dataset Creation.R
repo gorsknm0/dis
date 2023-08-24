@@ -88,8 +88,18 @@ data <- data %>%
   dplyr::distinct(extid, .keep_all = TRUE)
 
 # remove the crazy heights and weights
-data <- data %>%
-  filter(merged_height <= 220, merged_weight <= 80)
+#data <- data %>% filter(merged_height <= 220, merged_weight <= 80)
+# Calculate the IQR for height
+Q1 <- quantile(data$merged_height, 0.25)
+Q3 <- quantile(data$merged_height, 0.75)
+IQR <- Q3 - Q1
+
+# Define a range for outliers
+lower_bound <- Q1 - 1.5 * IQR
+upper_bound <- Q3 + 1.5 * IQR
+
+# Identify outliers based on IQR method
+outliers_iqr <- data[data$merged_height < lower_bound | data$merged_height > upper_bound, ]
 
 # Create a scatter plot of height vs weight
 ggplot(data, aes(x = merged_height, y = merged_weight)) +

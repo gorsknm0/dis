@@ -43,12 +43,12 @@ data %>%
   # add mopeia average line
   geom_hline(yintercept = mopeia_average, linetype = "dashed", color = "darkred") + 
   # add horizontal line
-  geom_text(aes(x = 1.5, y = national_average + 0.01,
+  geom_text(aes(x = 0.5, y = national_average + 0.01,
                 label = "National Stunting Average of 43% (Source: USAID)"),
             # make words bold fontface = 'bold',
             vjust = 0, hjust = 0, color = "darkblue", angle = 0, size = 3) + 
   #label the mopeia line
-  geom_text(aes(x = 4, y = mopeia_average + 0.005,
+  geom_text(aes(x = 0.5, y = mopeia_average + 0.01,
                label = "Mopeia Average of 40%"),
            vjust = 0, hjust = 0, color = "darkred", angle = 0, size = 3) +
   # add text annotation

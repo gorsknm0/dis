@@ -38,11 +38,6 @@ ward_table <- data %>%
     frequency = mean(stunted_numeric)
   )
 
-# create a table for village name with count and frequency while making a new column of its type
-village_table <- data %>%
-  group_by(village_name) %>%
-  summarize(n = n(), frequency = n() / nrow(data))
-
 # outline of Mopeia
 load('dis/mop.RData')
 plot(mop)
@@ -162,20 +157,3 @@ ggplot() + # add polygon layers from 'rf' dataset
   coord_fixed() +
   # Add a title to the plot
   labs(title = " Prevalence of Stunting in Children Under 5 in Wards")
-
-#####################  
-
-# make a table of each ward and the number of kids stunted and not stunted
-data %>%
-  group_by(ward_name) %>%
-  summarize(stunted_count = sum(stunted),
-            not_stunted = sum(!stunted))
-
-data %>%
-  group_by(cluster) %>%
-  summarize(stunted_count = sum(stunted),
-            not_stunted = sum(!stunted))
-
-data %>% 
-  summarize(stunted_count = sum(stunted),
-            not_stunted = sum(!stunted))
