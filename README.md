@@ -9,7 +9,14 @@ Research Objectives:
 
 ## Table of Contents
 *Graphs:* RScripts that create the graphs, maps, and tables for the dissertation
+*Dataset Creation.R:* RScript that generates the dataset used for the other RScripts
+*Extra.R:* RScript that cannot be run, but contains extra code
+*Moz_GC.png:* Image used for one of the experimental tables
+*README.md:* Basic instructions and information for the dataset
+*Regression.R:* RScript for the regression aspect of the research
+*mop.RData:* The outline of Mopeia used for creating maps etc.
+
 ## How to Install and Run the Project
-1. Obtain the data from the BOHEMIA repository, [https://dataverse.csuc.cat/dataverse/bohemia].
+1. Obtain the data from the BOHEMIA repository, [https://dataverse.csuc.cat/dataverse/bohemia]. Note: some data may need to be retrieved from the creator of this dataset.
 2. Run the Dataset Creation RScript.
 3. Proceed to run any RScript that you would like to to make the associated map, graph, or table.
