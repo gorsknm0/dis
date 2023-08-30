@@ -64,8 +64,7 @@ minicensus <- left_join(minicensus, encryption, by=c('hh_id'))
 # merge minicensus and data
 data <- left_join(minicensus, data, by=c('household_id'))
 
-
-## insert breastfeeding from 'Extra'##
+## insert breastfeeding from 'Extra' if wanted##
 
 # make age_in_days variable (this accounts for leap years) - 
 # this assumes the age was originally in years
@@ -128,7 +127,7 @@ data <- data %>%
 data <- data %>%
   filter(age <= 5)
 
-# multiple zscore calculators have been tried: whoanthro, childsds; they yield the same as the anthro package below.
+# multiple zscore calculators have been tried: whoanthro, childsds; they yield the same as the anthro package below. Therefore, the anthro package is used.
 
 # run the WHO's anthro package and save their output in a variable (library(anthro))
 who_output <- with(
@@ -160,14 +159,6 @@ data <- data %>%
 
 # bland altman plot to assess difference of measurements
 #ggplot(data, aes(x = (zlen + mod_haz) / 2, y = zlen - mod_haz)) + geom_point() + geom_hline(yintercept = 0, linetype = "dashed", color = "red")
-
-# Identify and remove outliers of zlen using IQR
-# outliers_zlen_iqr <- identify_outliers_iqr(data$zlen)
-# data <- data[!outliers_zlen_iqr, ]
-
-# Identify and remove outliers of zlen using IQR
-#outliers_mod_haz_iqr <- identify_outliers_iqr(data$mod_haz)
-#data <- data[!outliers_mod_haz_iqr, ]
 
 # make a new variable called strange showing all of the strange variables
 data <- data %>% mutate(strange=zlen<=-6|zlen>=6)
@@ -296,6 +287,11 @@ d <- rgeos::gDistance(clean_spatial_projected, admin_projected, byid = TRUE)
 
 # Pop the distances into the dataframe
 clean$admin_dist <- as.numeric(d)
+
+#make th distance from meters to kilometers
+clean$admin_km <- data$admin_dist / 1000
+clean$health_km <- data$health_dist / 1000
+clean$road_km <- data$road_dist / 1000
 
 # make age groups: Category 1: 0-5, Category 2: 6-11, Category 3: 12-17, Category 4: 18-24 months
 clean <- clean %>% 

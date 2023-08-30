@@ -22,21 +22,16 @@ library(deldir)
 library(rgeos)
 library(ggrepel)
 
-# load data
-data <- read.csv("Data Files for Git/Dataset.csv")
-
 # create a table for ward name with count and frequency while making a new column of its type
-ward_table <- data %>%
-  group_by(ward_name) %>%
-  summarize(n = n(), frequency = n() / nrow(data))
-
-#re-do
 ward_table <- data %>%
   group_by(ward_name) %>%
   summarize(
     n = n(),
     frequency = mean(stunted_numeric)
   )
+
+# load data
+data <- read.csv("Data Files for Git/Dataset.csv")
 
 # outline of Mopeia
 load('dis/mop.RData')
@@ -114,6 +109,15 @@ wrap_ward_names <- function(x) {
   str_wrap(x, width = 14)  # Adjust the width value as needed to control the length of each line
 }
 
+# Point data for the center of village
+x_coord <- 35.710798061452984
+y_coord <- -17.981304088784032
+
+# Create a data frame with the x and y coordinates and 'Type' as 'Village Center'
+point_data <- data.frame(lng = x_coord, 
+                         lat = y_coord,
+                         Type = "Village Center")
+
 # plot of prevalence of stunting in children under 5 in Wards
 ggplot() + # add polygon layers from 'rf' dataset
   geom_polygon(data = rf,
@@ -126,6 +130,14 @@ ggplot() + # add polygon layers from 'rf' dataset
   scale_fill_gradient2_tableau(name = 'Prevalence of Stunting',
                                palette = 'Green-Blue Diverging',
                                labels = label_percent(scale = 100)) + 
+  # Reproject 'point_data' to the CRS of 'hf_1' and then combine them into a single data frame
+  geom_point(data = point_data,
+             aes(x = lng, 
+                 y = lat, 
+                 color = "darkred"), 
+             size = 3, 
+             alpha = 1,
+             show.legend = FALSE) +
   # add ward name labels using repelling to prevent overlaps
   geom_label_repel(data = rf_centroids,
                    aes(x = x, 

@@ -9,11 +9,12 @@ library(knitr)
 library(fastmap)
 library(gridExtra)
 library(cowplot)
+library(ggplot2)
 
 # load data
 data <- read.csv("Data Files for Git/Dataset.csv")
 
-# make a table of characteristics of toddlers
+# make a table of characteristics
 options(knitr.table.format = "html") # to allow for a slightly complex table that RMarkdown doesn't support
 
 # create a table for ward name with count and frequency while making a new column of its type
@@ -89,7 +90,7 @@ merged_table <- merged_table %>%
          `Mean HAZ` = z_Score,
          `Stunted (%)` = stunted_percentage)
 
-#make frequency and stunting rates only 2 decimal points
+#make frequency, stunting rates, and HAZ only 2 decimal points
 merged_table$`%` <- round(merged_table$`%`, 1)
 merged_table$`Stunted (%)` <- round(merged_table$`Stunted (%)`, 1)
 merged_table$`Mean HAZ` <- round(merged_table$`Mean HAZ`, 2)
@@ -104,19 +105,22 @@ kbl(merged_table, caption = 'Distribution of Characteristics of Children Under F
   pack_rows('Wealth Index Rank', 17,21) %>%
   kable_minimal() 
 
-#from notes
-kbl(merged_table, caption = 'Distribution of Characteristics of Children Under Five in Mopeia') %>%
-  kable_styling(bootstrap_options = c('hover', 'condensed', font_size = 12)) %>%
-  pack_rows('Sex', 1, 2) %>%
-  pack_rows('Age Category (months)', 3, 8) %>%
-  pack_rows('Ward', 9, 16) %>%
-  add_header_above(c(' ' = 1, 'Frequency' = 2)) %>%
-  kable_minimal() %>%
-  footnote(general = 'Insert Source',
-               general_title = 'Source: ',
-               title_format = c('italic', 'underline'))
-
 ##############################################################################
+#This will be a scatterplot of distance to roads and zscore
+# Convert wealth_index_rank to factor
+data$wealth_index_rank <- factor(data$wealth_index_rank, levels = c("Rank 1 (richest)", "Rank 2", "Rank 3", "Rank 4", "Rank 5 (poorest)"))
+
+data$road_km <- data$road_dist / 1000
+
+# Create a scatter plot of zscore and distance to road
+ggplot(data, aes(x = road_km, y = zlen)) +
+  geom_point(alpha = 0.7, color = 'black') +
+  labs(title = 'C.',
+       x = 'Distance to road (km)',
+       y = 'Z-score') +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = -0.21))
+
 # This will be a histogram of height 
 plot_height <- ggplot(data, aes(x = height)) + 
   geom_histogram(colour = 'black') +
@@ -168,3 +172,25 @@ final_plot <- plot_grid(top_row, bottom_row, ncol = 1)
 final_plot
 
 #############################################
+# creating an overlay of height and age points on the Moz growth chart image
+library(grid)
+library(png)
+library(gridExtra)
+
+#load image
+img <- readPNG("dis/Moz_GC.png")
+
+# create the image as a plot
+image_plot <- ggplot() +
+  annotation_custom(rasterGrob(img), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf)
+image_plot <- image_plot + theme_void()
+
+#create the plot with the points on top of the image
+scatter_plot <- ggplot(data, aes(x = age, y = height)) +
+  labs(x = 'Age in years', y = 'Height (cm)') +
+  theme_void() +
+  annotation_raster(img, xmin = 0, xmax = 5, ymin = 40, ymax = 140) +
+  geom_point(data = data, aes(x = age, y = height), alpha = 0.2)
+
+#print the image
+print(scatter_plot)
