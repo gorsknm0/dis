@@ -10,6 +10,13 @@ library(fastmap)
 library(gridExtra)
 library(cowplot)
 library(ggplot2)
+library(readr)
+library(tidyverse)
+library(aod)
+library(rgdal)
+library(ggthemes)
+library(scales)
+library(ggtext)
 
 # load data
 data <- read.csv("Data Files for Git/Dataset.csv")
@@ -51,6 +58,11 @@ age_table <- data %>%
 
 # Make age categories in the proper order
 age_category_order <- c('0-5', '6-11', '12-23', '24-35', '36-47', '48-60')
+wealth_index_rank_order <- c('Rank 1 (richest)',
+                             "Rank 2",
+                             "Rank 3",
+                             "Rank 4",
+                             "Rank 5 (poorest)")
 
 age_table <- age_table %>%
   arrange(factor(age_category, levels = age_category_order))
@@ -104,6 +116,142 @@ kbl(merged_table, caption = 'Distribution of Characteristics of Children Under F
   pack_rows('Ward', 9, 16) %>% #the numbers are the selected rows %>%
   pack_rows('Wealth Index Rank', 17,21) %>%
   kable_minimal() 
+
+# change sex names
+data$sex <- factor(data$sex, 
+                   levels = c("f", "m"),
+                 labels = c("Female", "Male"))
+
+# Now let's make this into a visual
+sex_plot <- data %>%
+  group_by(sex) %>%
+  summarise(p = mean(stunted == 'TRUE'),
+            ci_low = t.test(stunted == 'TRUE', 
+                            conf.level = 0.95)$conf.int[1],
+            ci_high = t.test(stunted == 'TRUE', 
+                             conf.level = 0.95)$conf.int[2]) %>%
+  ggplot(aes(x = sex,
+             y = p)) +  # Add fill aesthetic for distinct bars
+  geom_bar(stat = 'identity', position = 'dodge', fill = "grey80") +
+  geom_errorbar(aes(ymin = ci_low, ymax = ci_high),
+                position = position_dodge(width = 0.9), width = 0.2) +
+  geom_text(aes(label = sex),
+            position = position_stack(vjust = 0.3),
+            angle = 90, hjust = 0) +
+  labs(title = "A",
+       x = 'Sex',  # Empty x-axis label
+       y = 'Proportion') +
+  scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
+  scale_x_discrete(labels = NULL) +  # Remove x-axis labels
+  theme(axis.ticks.x = element_blank(),  # Hide x-axis ticks
+        axis.title.x = element_blank(),  # Hide x-axis title
+        axis.text.y = element_text(size = 10),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = -0.07))
+
+age_plot <- data %>%
+  group_by(age_category) %>%
+  summarise(p = mean(stunted == 'TRUE'),
+            ci_low = t.test(stunted == 'TRUE', 
+                            conf.level = 0.95)$conf.int[1],
+            ci_high = t.test(stunted == 'TRUE', 
+                             conf.level = 0.95)$conf.int[2]) %>%
+  mutate(age_category = factor(age_category, levels = age_category_order)) %>%
+  ggplot(aes(x = age_category,
+             y = p)) +
+  geom_bar(stat = 'identity', position = 'dodge', fill = 'grey80') +
+  geom_errorbar(aes(ymin = ci_low, ymax = ci_high),
+                position = position_dodge(width = 0.9), width = 0.2) +
+  geom_text(aes(label = age_category),
+            position = position_stack(vjust = 0.1),
+            angle = 90, hjust = 0) +  # Adjust text position and angle
+  labs(title = "B",
+       x = 'Age category (months)',  # Empty x-axis label
+       y = 'Proportion') +
+  scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
+  scale_x_discrete(labels = NULL) +  # Remove x-axis labels
+  theme(axis.ticks.x = element_blank(),  # Hide x-axis ticks
+        axis.title.x = element_blank(),  # Hide x-axis title
+        axis.text.y = element_text(size = 10),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = -0.07))
+
+
+ward_plot <- data %>%
+  group_by(ward_name) %>%
+  summarise(p = mean(stunted == 'TRUE'),
+            ci_low = t.test(stunted == 'TRUE', 
+                            conf.level = 0.95)$conf.int[1],
+            ci_high = t.test(stunted == 'TRUE', 
+                             conf.level = 0.95)$conf.int[2]) %>%
+  arrange(ward_name) %>%
+  ggplot(aes(x = ward_name,
+             y = p)) +
+  geom_bar(stat = 'identity', position = 'dodge', fill = 'grey80') +
+  geom_errorbar(aes(ymin = ci_low, ymax = ci_high),
+                position = position_dodge(width = 0.9), width = 0.2) +
+  geom_text(aes(label = ward_name),
+            position = position_stack(vjust = 0.01),
+            angle = 90,  # Rotate the text by 90 degrees
+            hjust = 0) +  # Adjust horizontal alignment
+  labs(title = "C",
+       x = 'Wards',
+       y = 'Proportion') +
+  scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
+  scale_x_discrete(labels = NULL) +
+  theme(axis.text.x = element_blank(),  # Hide default x-axis labels
+        axis.ticks.x = element_blank(),  # Hide x-axis ticks
+        axis.title.x = element_blank(),  # Hide x-axis title
+        axis.text.y = element_text(size = 10),  # Adjust y-axis text size
+        panel.grid.major.x = element_blank(),  # Hide major grid lines
+        panel.grid.minor.x = element_blank()) +  # Hide minor grid lines
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = -0.07))
+
+wealth_plot <- data %>%
+  group_by(wealth_index_rank) %>%
+  summarise(p = mean(stunted == 'TRUE'),
+            ci_low = t.test(stunted == 'TRUE', 
+                            conf.level = 0.95)$conf.int[1],
+            ci_high = t.test(stunted == 'TRUE', 
+                             conf.level = 0.95)$conf.int[2]) %>%
+  mutate(wealth_index_rank = factor(wealth_index_rank, levels = wealth_index_rank_order)) %>%
+  ggplot(aes(x = wealth_index_rank,
+             y = p)) +
+  geom_bar(stat = 'identity', position = 'dodge', fill = 'grey80') +
+  geom_errorbar(aes(ymin = ci_low, ymax = ci_high),
+                position = position_dodge(width = 0.9), width = 0.2) +
+  geom_text(aes(label = wealth_index_rank),
+            position = position_stack(vjust = 0.1),
+            angle = 90,  # Rotate the text by 90 degrees
+            hjust = 0) +  # Adjust horizontal alignment
+  labs(title = "D",
+       x = 'Wealth Index Ranks',
+       y = 'Proportion') +
+  scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
+  scale_x_discrete(labels = NULL) +
+  theme(axis.text.x = element_blank(),  # Hide default x-axis labels
+        axis.ticks.x = element_blank(),  # Hide x-axis ticks
+        axis.title.x = element_blank(),  # Hide x-axis title
+        axis.text.y = element_text(size = 10),  # Adjust y-axis text size
+        panel.grid.major.x = element_blank(),  # Hide major grid lines
+        panel.grid.minor.x = element_blank()) +  # Hide minor grid lines
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = -0.07))
+
+#put all four plots in one
+three_in_one <- plot_grid(sex_plot, age_plot, ward_plot, ncol = 3)
+three_in_one
+top_row1 <- plot_grid(sex_plot, age_plot, ncol = 2)
+top_row1
+bottom_row1 <- plot_grid(ward_plot, wealth_plot, ncol = 2)        
+bottom_row1
+final_plot <- plot_grid(top_row1, bottom_row1, ncol = 1)
+final_plot
 
 ##############################################################################
 #This will be a scatterplot of distance to roads and zscore
