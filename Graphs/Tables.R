@@ -269,6 +269,26 @@ ggplot(data, aes(x = road_km, y = zlen)) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = -0.21))
 
+# make the scatter plot into segments to better see the distribution
+data$dist_cat <- cut(data$road_km, breaks = c(0, 2, 4, 6, 8, Inf),
+                     labels = c('0-2 km',
+                                '2-4 km',
+                                '4-6 km',
+                                '6-8 km',
+                                '8+ km'),
+                     right = FALSE)
+
+ggplot(data, aes(x = zlen, fill = stunted)) +
+  geom_density() +
+  theme_minimal() +
+  facet_grid(rows = vars(dist_cat)) +
+  labs(x = 'Z-score',
+       y = 'Density') +
+  scale_fill_manual(values = c('FALSE' = 'grey80', 'TRUE' = 'black'),
+                    name = '',
+                    labels = c('Not Stunted', 'Stunted')) +
+  theme_minimal()
+
 # This will be a histogram of height 
 plot_height <- ggplot(data, aes(x = height)) + 
   geom_histogram(colour = 'black') +
