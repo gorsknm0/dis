@@ -140,7 +140,7 @@ sex_plot <- data %>%
             angle = 90, hjust = 0) +
   labs(title = "A",
        x = 'Sex',  # Empty x-axis label
-       y = 'Proportion') +
+       y = 'Proportion Stunted') +
   scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
   scale_x_discrete(labels = NULL) +  # Remove x-axis labels
   theme(axis.ticks.x = element_blank(),  # Hide x-axis ticks
@@ -169,7 +169,7 @@ age_plot <- data %>%
             angle = 90, hjust = 0) +  # Adjust text position and angle
   labs(title = "B",
        x = 'Age category (months)',  # Empty x-axis label
-       y = 'Proportion') +
+       y = 'Proportion Stunted') +
   scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
   scale_x_discrete(labels = NULL) +  # Remove x-axis labels
   theme(axis.ticks.x = element_blank(),  # Hide x-axis ticks
@@ -200,7 +200,7 @@ ward_plot <- data %>%
             hjust = 0) +  # Adjust horizontal alignment
   labs(title = "C",
        x = 'Wards',
-       y = 'Proportion') +
+       y = 'Proportion Stunted') +
   scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
   scale_x_discrete(labels = NULL) +
   theme(axis.text.x = element_blank(),  # Hide default x-axis labels
@@ -231,7 +231,7 @@ wealth_plot <- data %>%
             hjust = 0) +  # Adjust horizontal alignment
   labs(title = "D",
        x = 'Wealth Index Ranks',
-       y = 'Proportion') +
+       y = 'Proportion Stunted') +
   scale_y_continuous(labels = percent_format(scale = 100), limits = c(0, 0.6)) +
   scale_x_discrete(labels = NULL) +
   theme(axis.text.x = element_blank(),  # Hide default x-axis labels
